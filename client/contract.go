@@ -2,16 +2,12 @@ package client
 
 
 import (
-	"fmt"
 	"log"
-	"crypto/ecdsa"
 	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/core/types"
 
 	abi "github.com/2cluster/ethclient/client/contract"
@@ -29,12 +25,9 @@ type Contract struct {
 
 
 
-func (c *Client) DeployContract() *Contract {
+func (c *Client) DeployContract() {
 
-	var contract Contract
-
-
-	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.address)
+	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +37,7 @@ func (c *Client) DeployContract() *Contract {
 		log.Fatal(err)
 	}
 
-	auth := bind.NewKeyedTransactor(c.Account.privateKey)
+	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(0)
 	auth.GasLimit = uint64(3000000)
@@ -56,13 +49,105 @@ func (c *Client) DeployContract() *Contract {
 		log.Fatal(err)
 	}
 
-	contract.Name = "SUSD"
-	contract.Instance = *instance
-	contract.Address = address
-	contract.Tx = tx
+	c.Contract.Name = "SUSD"
+	c.Contract.Instance = *instance
+	c.Contract.Address = address
+	c.Contract.Tx = tx
 
-	log.Println(tx.Hash().Hex())
-
-	return &contract
 }
 
+
+func (c *Client) BindContract(address common.Address) {
+	instance, err := abi.NewSUSD(address, c.eth)
+	if err != nil {
+		log.Fatalf("Failed to bind contract: %v", err)
+	}
+
+	c.Contract.Name = "SUSD"
+	c.Contract.Instance = *instance
+	c.Contract.Address = address
+}
+
+
+func (c *Client) QueryBalance(address common.Address) *big.Int {
+	balance, err := c.Contract.Instance.BalanceOf(&bind.CallOpts{}, address)
+	if err != nil {
+		log.Fatalf("Failed to query balance: %v", err)
+	}
+	return balance
+}
+
+func (c *Client) QueryAllowance(from common.Address, spender common.Address)  *big.Int {
+
+	allowance, err := c.Contract.Instance.Allowance(&bind.CallOpts{}, from, spender)
+	if err != nil {
+		log.Fatalf("Failed to query allowance: %v", err)
+	}
+	return allowance
+
+}
+
+func (c *Client) AproveAllowance(spender common.Address, amount int64) {
+
+	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0) 
+	auth.GasLimit = uint64(3000000) 
+	auth.GasPrice = gasPrice
+
+	c.Contract.Instance.Approve(auth, spender, big.NewInt(amount))
+
+}
+
+func (c *Client) Transfer(to common.Address, amount int64) {
+	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0) 
+	auth.GasLimit = uint64(3000000) 
+	auth.GasPrice = gasPrice
+
+	c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
+
+}
+
+
+func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) {
+
+	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0) 
+	auth.GasLimit = uint64(3000000) 
+	auth.GasPrice = gasPrice
+
+	c.Contract.Instance.TransferFrom(auth, from, to, big.NewInt(amount))
+}

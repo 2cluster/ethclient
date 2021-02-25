@@ -3,24 +3,18 @@ package client
 
 import (
 	"fmt"
-	"log"
 	"crypto/ecdsa"
-	"context"
-	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/core/types"
 
 )
 
 type Account struct {
-	holder string
-	privateKey *ecdsa.PrivateKey
-	publicKey *ecdsa.PublicKey
-	address common.Address
+	Holder string
+	PrivateKey *ecdsa.PrivateKey
+	PublicKey *ecdsa.PublicKey
+	Address common.Address
 }
 
 
@@ -44,10 +38,10 @@ func genAccount(owner string, privateKey string) (*Account, error) {
 
 	adr := crypto.PubkeyToAddress(*publicKeyECDSA)
 	
-	account.holder = owner
-	account.privateKey = privk
-	account.publicKey = publicKeyECDSA
-	account.address = adr
+	account.Holder = owner
+	account.PrivateKey = privk
+	account.PublicKey = publicKeyECDSA
+	account.Address = adr
 
 
     return &account, nil
