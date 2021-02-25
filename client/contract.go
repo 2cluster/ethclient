@@ -69,24 +69,24 @@ func (c *Client) BindContract(address common.Address) {
 }
 
 
-func (c *Client) QueryBalance(address common.Address) *big.Int {
+func (c *Client) QueryBalance(address common.Address) int64 {
 	balance, err := c.Contract.Instance.BalanceOf(&bind.CallOpts{}, address)
 	if err != nil {
 		log.Fatalf("Failed to query balance: %v", err)
 	}
-	return balance
+	return balance.Int64()
 }
 
-func (c *Client) QueryAllowance(from common.Address, spender common.Address)  *big.Int {
+func (c *Client) QueryAllowance(from common.Address, spender common.Address) int64 {
 
 	allowance, err := c.Contract.Instance.Allowance(&bind.CallOpts{}, from, spender)
 	if err != nil {
 		log.Fatalf("Failed to query allowance: %v", err)
 	}
-	return allowance
+	return allowance.Int64()
 
 }
-
+ 
 func (c *Client) AproveAllowance(spender common.Address, amount int64) {
 
 	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
