@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	client, err:= eth.NewClient("Ruud", "f238a37e42b7062bdbc062a1833a6361f9a6d0e324a95ca2f7c4c3034e67ee5c")
+	client, err:= eth.NewClient("Ruud", "6c0081a5b9511910a6cec018a99d3031197f079cde51c1a78124750a990cdd08")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -19,15 +19,22 @@ func main() {
 	// fmt.Println(client.Contract.Address)
 
 
-	client.BindContract(common.HexToAddress("0xC382b4aF66EDb6Aa717B6A07330d41364b787B02"))
-	balance := client.QueryBalance(client.Account.Address)
+	err = client.BindContract(common.HexToAddress("0x9c6947E8F72228F0D278763EE8efEC4fB7088c29"))
+	if err != nil {
+		fmt.Println(err)
+	}
+	balance, err := client.QueryBalance(client.Account.Address)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(balance)
 	
-	allowance := client.QueryAllowance(client.Account.Address,  client.Account.Address)
-	fmt.Println(allowance)
-	fmt.Println(balance)
+	// allowance := client.QueryAllowance(client.Account.Address,  common.HexToAddress("0x559BC07434C89c5496d790DFD2885dC966F9113a"))
 
-	client.AproveAllowance(client.Account.Address,  200)
 
-	client.TransferFrom(client.Account.Address, client.Account.Address,  10)
+	err = client.Transfer(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"),  60)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// client.TransferFrom(client.Account.Address, client.Account.Address,  10)
 }

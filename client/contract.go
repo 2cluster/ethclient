@@ -2,7 +2,7 @@ package client
 
 
 import (
-	"log"
+	"fmt"
 	"context"
 	"math/big"
 
@@ -14,7 +14,7 @@ import (
 )
 
 
-const infuraURL		= "https://rinkeby.infura.io/v3/634d2ee71c3e44a4ab4990f90f561398"
+const infuraURL = "https://rinkeby.infura.io/v3/634d2ee71c3e44a4ab4990f90f561398"
 
 type Contract struct {
 	Name string
@@ -25,16 +25,16 @@ type Contract struct {
 
 
 
-func (c *Client) DeployContract() {
+func (c *Client) DeployContract() error {
 
 	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -46,7 +46,7 @@ func (c *Client) DeployContract() {
 
 	address, tx, instance, err := abi.DeploySUSD(auth, c.eth)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	c.Contract.Name = "SUSD"
@@ -54,49 +54,52 @@ func (c *Client) DeployContract() {
 	c.Contract.Address = address
 	c.Contract.Tx = tx
 
+	return nil
 }
 
 
-func (c *Client) BindContract(address common.Address) {
+func (c *Client) BindContract(address common.Address) error {
 	instance, err := abi.NewSUSD(address, c.eth)
 	if err != nil {
-		log.Fatalf("Failed to bind contract: %v", err)
+		return fmt.Errorf("Failed to bind contract: %v", err)
 	}
 
 	c.Contract.Name = "SUSD"
 	c.Contract.Instance = *instance
 	c.Contract.Address = address
+
+	return nil
 }
 
 
-func (c *Client) QueryBalance(address common.Address) int64 {
+func (c *Client) QueryBalance(address common.Address) (int64, error) {
 	balance, err := c.Contract.Instance.BalanceOf(&bind.CallOpts{}, address)
 	if err != nil {
-		log.Fatalf("Failed to query balance: %v", err)
+		return 0, fmt.Errorf("Failed to query balance: %v", err)
 	}
-	return balance.Int64()
+	return balance.Int64(), nil
 }
 
-func (c *Client) QueryAllowance(from common.Address, spender common.Address) int64 {
+func (c *Client) QueryAllowance(from common.Address, spender common.Address) (int64, error){
 
 	allowance, err := c.Contract.Instance.Allowance(&bind.CallOpts{}, from, spender)
 	if err != nil {
-		log.Fatalf("Failed to query allowance: %v", err)
+		return 0, fmt.Errorf("Failed to query allowance: %v", err)
 	}
-	return allowance.Int64()
+	return allowance.Int64(), nil
 
 }
  
-func (c *Client) AproveAllowance(spender common.Address, amount int64) {
+func (c *Client) AproveAllowance(spender common.Address, amount int64) error {
 
 	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to AproveAllowance: %v", err)
 	}
 
 	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to AproveAllowance: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -106,18 +109,18 @@ func (c *Client) AproveAllowance(spender common.Address, amount int64) {
 	auth.GasPrice = gasPrice
 
 	c.Contract.Instance.Approve(auth, spender, big.NewInt(amount))
-
+	return nil
 }
 
-func (c *Client) Transfer(to common.Address, amount int64) {
+func (c *Client) Transfer(to common.Address, amount int64) error {
 	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -127,20 +130,20 @@ func (c *Client) Transfer(to common.Address, amount int64) {
 	auth.GasPrice = gasPrice
 
 	c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
-
+	return nil
 }
 
 
-func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) {
+func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) error {
 
 	nonce, err := c.eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to TransferFrom: %v", err)
 	}
 
 	gasPrice, err := c.eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to TransferFrom: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -150,4 +153,6 @@ func (c *Client) TransferFrom(from common.Address, to common.Address, amount int
 	auth.GasPrice = gasPrice
 
 	c.Contract.Instance.TransferFrom(auth, from, to, big.NewInt(amount))
+
+	return nil
 }
