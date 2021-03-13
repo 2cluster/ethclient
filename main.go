@@ -32,9 +32,10 @@ func main() {
 	// allowance := client.QueryAllowance(client.Account.Address,  common.HexToAddress("0x559BC07434C89c5496d790DFD2885dC966F9113a"))
 
 
-	err = client.Transfer(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"),  60)
+	tx, err := client.Transfer(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"),  400000)
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(tx)
 	// client.TransferFrom(client.Account.Address, client.Account.Address,  10)
 }

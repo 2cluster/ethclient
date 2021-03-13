@@ -12,13 +12,13 @@ type Client struct {
 }
 
 
-func NewClient(name string, pk string) (Client, error) {
+func NewClient(name string, pk string, network string) (Client, error) {
 	acount, err := genAccount(name, pk)
 	if err != nil {
 		return Client{}, err
 	}
 
-	connection, err := ethclient.Dial(infuraURL)
+	connection, err := ethclient.Dial(VALUE_URL[network])
 	if err 	!= nil {
 		return Client{}, err
 	}
