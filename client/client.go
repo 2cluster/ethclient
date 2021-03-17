@@ -7,7 +7,7 @@ import (
 
 type Client struct {
 	Account *Account
-	eth *ethclient.Client
+	Eth *ethclient.Client
 	Contract *Contract
 }
 
