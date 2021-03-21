@@ -127,7 +127,7 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (*ethtyp
 	return receipt, nil
 }
 
-func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, error) {
+func (c *Client) Transfer(to common.Address, amount int64) (*common.Hash, error) {
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to Transfer: %v", err)
@@ -154,7 +154,7 @@ func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, e
 		return nil, fmt.Errorf("err: %v \n", err)
 	}
 
-	return receipt, nil
+	return receipt.TxHash, nil
 
 }
 
