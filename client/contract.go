@@ -146,12 +146,12 @@ func (c *Client) Transfer(to common.Address, amount int64) (string, string, erro
 
 	tx, err := c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return "","", fmt.Errorf("err in transfer: %v \n", err)
 	}
 
 	contractAdr, txHash, err := waitMined(context.Background(), c.Eth, tx)
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return "","", fmt.Errorf("err in waiting for mint: %v \n", err)
 	}
 
 	return contractAdr, txHash, nil
