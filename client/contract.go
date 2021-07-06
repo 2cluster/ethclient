@@ -145,7 +145,8 @@ func (c *Client) Transfer(to common.Address, amount int64) (string, string, erro
 	auth.GasLimit = uint64(3000000) 
 	auth.GasPrice = gasPrice
 
-	fmt.Println(err)
+	fmt.Println(to)
+	fmt.Println(amount)
 
 	tx, err := c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
 	if err != nil {
