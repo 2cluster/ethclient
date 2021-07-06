@@ -22,7 +22,7 @@ var VALUE_URL = map[string]string{
 	"LOCAL3" 		: "devchain:8545",
 }
 
-var CONFIRMATIONS = uint64(1)
+var CONFIRMATIONS = uint64(0)
 
 type Contract struct {
 	Name string
@@ -128,6 +128,7 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (string,
 }
 
 func (c *Client) Transfer(to common.Address, amount int64) (string, string, error) {
+	fmt.Println("enter transfer function")
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
 		return "","", fmt.Errorf("Failed to Transfer: %v", err)
@@ -143,6 +144,8 @@ func (c *Client) Transfer(to common.Address, amount int64) (string, string, erro
 	auth.Value = big.NewInt(0) 
 	auth.GasLimit = uint64(3000000) 
 	auth.GasPrice = gasPrice
+
+	fmt.Println(err)
 
 	tx, err := c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
 	if err != nil {
