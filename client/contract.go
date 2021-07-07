@@ -22,7 +22,7 @@ var VALUE_URL = map[string]string{
 	"LOCAL3" 		: "devchain:8545",
 }
 
-var CONFIRMATIONS = uint64(0)
+var CONFIRMATIONS = uint64(2)
 
 type Contract struct {
 	Name string
