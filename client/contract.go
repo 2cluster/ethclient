@@ -96,16 +96,16 @@ func (c *Client) QueryAllowance(from common.Address, spender common.Address) (in
 
 }
 
-func (c *Client) ApproveAllowance(spender common.Address, amount int64) (string, string, error) {
+func (c *Client) ApproveAllowance(spender common.Address, amount int64) (*ethtypes.Receipt, error) {
 
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		return "","", fmt.Errorf("Failed to AproveAllowance: %v", err)
+		return nil, fmt.Errorf("Failed to AproveAllowance: %v", err)
 	}
 
 	gasPrice, err := c.Eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		return "","", fmt.Errorf("Failed to AproveAllowance: %v", err)
+		return nil, fmt.Errorf("Failed to AproveAllowance: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -116,27 +116,27 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (string,
 
 	tx, err := c.Contract.Instance.Approve(auth, spender, big.NewInt(amount))
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return nil, fmt.Errorf("err: %v \n", err)
 	}
 
-	contractAdr, txHash, err := waitMined(context.Background(), c.Eth, tx)
+	receipt, err := waitMined(context.Background(), c.Eth, tx)
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return nil, fmt.Errorf("err: %v \n", err)
 	}
 
-	return contractAdr, txHash, nil
+	return receipt, nil
 }
 
-func (c *Client) Transfer(to common.Address, amount int64) (string, string, error) {
+func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, error) {
 	fmt.Println("enter transfer function")
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		return "","", fmt.Errorf("Failed to Transfer: %v", err)
+		return nil, fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	gasPrice, err := c.Eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		return "","", fmt.Errorf("Failed to Transfer: %v", err)
+		return nil, fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -145,34 +145,31 @@ func (c *Client) Transfer(to common.Address, amount int64) (string, string, erro
 	auth.GasLimit = uint64(3000000) 
 	auth.GasPrice = gasPrice
 
-	fmt.Println(to)
-	fmt.Println(amount)
-
 	tx, err := c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
 	if err != nil {
-		return "","", fmt.Errorf("err in transfer: %v \n", err)
+		return nil, fmt.Errorf("err in transfer: %v \n", err)
 	}
 
-	contractAdr, txHash, err := waitMined(context.Background(), c.Eth, tx)
+	receipt, err := waitMined(context.Background(), c.Eth, tx)
 	if err != nil {
-		return "","", fmt.Errorf("err in waiting for mint: %v \n", err)
+		return nil, fmt.Errorf("err in waiting for mint: %v \n", err)
 	}
 
-	return contractAdr, txHash, nil
+	return receipt, nil
 
 }
 
 
-func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) (string, string, error) {
+func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) (*ethtypes.Receipt, error) {
 
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		return "","", fmt.Errorf("Failed to TransferFrom: %v", err)
+		return nil, fmt.Errorf("Failed to TransferFrom: %v", err)
 	}
 
 	gasPrice, err := c.Eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		return "","", fmt.Errorf("Failed to TransferFrom: %v", err)
+		return nil, fmt.Errorf("Failed to TransferFrom: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -183,24 +180,24 @@ func (c *Client) TransferFrom(from common.Address, to common.Address, amount int
 
 	tx, err := c.Contract.Instance.TransferFrom(auth, from, to, big.NewInt(amount))
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return nil, fmt.Errorf("err: %v \n", err)
 	}
 
-	contractAdr, txHash, err := waitMined(context.Background(), c.Eth, tx)
+	receipt, err := waitMined(context.Background(), c.Eth, tx)
 	if err != nil {
-		return "","", fmt.Errorf("err: %v \n", err)
+		return nil, fmt.Errorf("err: %v \n", err)
 	}
 
-	return contractAdr, txHash, nil
+	return receipt, nil
 }
 
-func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transaction) (string, string, error) {
+func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transaction) (*ethtypes.Receipt, error) {
 	receipt, err := WaitMinedWithTxHash(ctx, conn, tx.Hash().Hex(), CONFIRMATIONS)
 	if err != nil {
-		return "","", err
+		return nil, err
 	}
 	if receipt.Status == 0 {
-		return "","", fmt.Errorf("Transaction Failed")
+		return nil, fmt.Errorf("Transaction Failed")
 	}
 
 	return receipt.ContractAddress.String(), receipt.TxHash.Hex(), nil
