@@ -200,7 +200,7 @@ func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transac
 		return nil, fmt.Errorf("Transaction Failed")
 	}
 
-	return receipt.ContractAddress.String(), receipt.TxHash.Hex(), nil
+	return receipt, nil
 }
 
 // WaitMined waits for tx to be mined on the blockchain
