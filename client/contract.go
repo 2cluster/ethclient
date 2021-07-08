@@ -22,7 +22,7 @@ var VALUE_URL = map[string]string{
 	"LOCAL3" 		: "devchain:8545",
 }
 
-var CONFIRMATIONS = uint64(2)
+var CONFIRMATIONS = uint64(1)
 
 type Contract struct {
 	Name string
@@ -128,7 +128,7 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (*ethtyp
 }
 
 func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, error) {
-	fmt.Println("enter transfer function")
+	fmt.Println("Initiating transfer process")
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to Transfer: %v", err)
@@ -238,6 +238,7 @@ func WaitMinedWithTxHash(ctx context.Context, ec *ethclient.Client,
 			// Wait for the next round
 			select {
 			case <-ctx.Done():
+				fmt.Printf(".")
 				fmt.Println(ctx.Err())
 				return nil, ctx.Err()
 			case <-queryTicker.C:
