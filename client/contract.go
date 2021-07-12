@@ -119,12 +119,7 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (string,
 		return "", fmt.Errorf("err: %v \n", err)
 	}
 
-	receipt, err := waitMined(context.Background(), c.Eth, tx)
-	if err != nil {
-		return "", fmt.Errorf("err: %v \n", err)
-	}
-
-	return receipt, nil
+	return tx.Hash().Hex(), nil
 }
 
 func (c *Client) Transfer(to common.Address, amount int64) (string, error) {
@@ -149,8 +144,6 @@ func (c *Client) Transfer(to common.Address, amount int64) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("err in transfer: %v \n", err)
 	}
-
-	tx.Hash().Hex()
 
 	// receipt, err := waitMined(context.Background(), c.Eth, tx)
 	// if err != nil {
@@ -185,15 +178,15 @@ func (c *Client) TransferFrom(from common.Address, to common.Address, amount int
 		return "", fmt.Errorf("err: %v \n", err)
 	}
 
-	receipt, err := waitMined(context.Background(), c.Eth, tx)
-	if err != nil {
-		return "", fmt.Errorf("err: %v \n", err)
-	}
+	// receipt, err := waitMined(context.Background(), c.Eth, tx)
+	// if err != nil {
+	// 	return "", fmt.Errorf("err: %v \n", err)
+	// }
 
-	return receipt, nil
+	return tx.Hash().Hex(), nil
 }
 
-func (c *Client) getTxResult(tx string) (*ethtypes.Receipt, error) {
+func (c *Client) getTxValidation(tx string) (*ethtypes.Receipt, error) {
 	receipt, err := waitMined(context.Background(), c.Eth, tx)
 	if err != nil {
 		return nil, fmt.Errorf("err: %v \n", err)
