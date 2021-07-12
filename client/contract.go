@@ -196,7 +196,7 @@ func (c *Client) getTxValidation(tx string) (*ethtypes.Receipt, error) {
 }
 
 
-func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transaction) (*ethtypes.Receipt, error) {
+func waitMined(ctx context.Context, conn *ethclient.Client, tx string) (*ethtypes.Receipt, error) {
 	receipt, err := WaitMinedWithTxHash(ctx, conn, tx)
 	if err != nil {
 		return nil, err
@@ -237,9 +237,9 @@ func WaitMinedWithTxHash(ctx context.Context, ec *ethclient.Client,
 			fmt.Printf("\n")
 			fmt.Printf("https://rinkeby.etherscan.io/tx/" + txHash + "\n")
 			fmt.Printf("\n")
-			fmt.Printf("Waiting for %d block confirmations.", blockDelay)
+			fmt.Printf("Waiting for %d block confirmations.", CONFIRMATIONS)
 
-			if blockDelay == 0 {
+			if CONFIRMATIONS == 0 {
 				return receipt, rerr
 			}
 			break
