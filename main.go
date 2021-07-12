@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 	// "context"
-	eth "github.com/2cluster/ethclient/client"
+	eth "./client"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -25,17 +25,17 @@ func main() {
 		fmt.Println(err)
 	}
 
-	balance, err := client.QueryBalance(client.Account.Address)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(balance)
+	// balance, err := client.QueryBalance(client.Account.Address)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(balance)
 
-	balance2, err := client.QueryBalance(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"))
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(balance2)
+	// balance2, err := client.QueryBalance(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"))
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(balance2)
 	
 	// allowance, err := client.QueryAllowance(common.HexToAddress("0x559BC07434C89c5496d790DFD2885dC966F9113a"),  common.HexToAddress("0x54806DD512b21814aa560D627432a75720ed6bB3"))
 	// if err != nil {
@@ -48,16 +48,10 @@ func main() {
 	// 	fmt.Println(err)
 	// }
 
-	contractAddress, txHash, err := client.Transfer(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"), 100)
+	txHash, err := client.Transfer(common.HexToAddress("0x6dC89393FA30b64c56DEFF31dAAcf10cEdcD852D"), 100)
 	if err != nil {
 		fmt.Println(err)
 	}
 	
-	fmt.Println(contractAddress)
-
-
 	fmt.Println(txHash)
-
-
-
 }

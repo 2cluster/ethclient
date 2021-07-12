@@ -22,7 +22,7 @@ var VALUE_URL = map[string]string{
 	"LOCAL3" 		: "devchain:8545",
 }
 
-var CONFIRMATIONS = uint64(1)
+var CONFIRMATIONS = uint64(2)
 
 type Contract struct {
 	Name string
@@ -96,7 +96,7 @@ func (c *Client) QueryAllowance(from common.Address, spender common.Address) (in
 
 }
 
-func (c *Client) ApproveAllowance(spender common.Address, amount int64) (*ethtypes.Receipt, error) {
+func (c *Client) ApproveAllowance(spender common.Address, amount int64) (string, error) {
 
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
@@ -127,16 +127,16 @@ func (c *Client) ApproveAllowance(spender common.Address, amount int64) (*ethtyp
 	return receipt, nil
 }
 
-func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, error) {
+func (c *Client) Transfer(to common.Address, amount int64) (string, error) {
 	fmt.Println("Initiating transfer process")
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to Transfer: %v", err)
+		return "", fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	gasPrice, err := c.Eth.SuggestGasPrice(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Failed to Transfer: %v", err)
+		return "", fmt.Errorf("Failed to Transfer: %v", err)
 	}
 
 	auth := bind.NewKeyedTransactor(c.Account.PrivateKey)
@@ -147,20 +147,22 @@ func (c *Client) Transfer(to common.Address, amount int64) (*ethtypes.Receipt, e
 
 	tx, err := c.Contract.Instance.Transfer(auth, to, big.NewInt(amount))
 	if err != nil {
-		return nil, fmt.Errorf("err in transfer: %v \n", err)
+		return "", fmt.Errorf("err in transfer: %v \n", err)
 	}
 
-	receipt, err := waitMined(context.Background(), c.Eth, tx)
-	if err != nil {
-		return nil, fmt.Errorf("err in waiting for mint: %v \n", err)
-	}
+	tx.Hash().Hex()
 
-	return receipt, nil
+	// receipt, err := waitMined(context.Background(), c.Eth, tx)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("err in waiting for mint: %v \n", err)
+	// }
+
+	return tx.Hash().Hex(), nil
 
 }
 
 
-func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) (*ethtypes.Receipt, error) {
+func (c *Client) TransferFrom(from common.Address, to common.Address, amount int64) (string, error) {
 
 	nonce, err := c.Eth.PendingNonceAt(context.Background(), c.Account.Address)
 	if err != nil {
@@ -191,8 +193,18 @@ func (c *Client) TransferFrom(from common.Address, to common.Address, amount int
 	return receipt, nil
 }
 
+func (c *Client) getTxResult(tx string) (*ethtypes.Receipt, error) {
+	receipt, err := waitMined(context.Background(), c.Eth, tx)
+	if err != nil {
+		return nil, fmt.Errorf("err: %v \n", err)
+	}
+
+	return receipt, nil
+}
+
+
 func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transaction) (*ethtypes.Receipt, error) {
-	receipt, err := WaitMinedWithTxHash(ctx, conn, tx.Hash().Hex(), CONFIRMATIONS)
+	receipt, err := WaitMinedWithTxHash(ctx, conn, tx)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +218,7 @@ func waitMined(ctx context.Context, conn *ethclient.Client, tx *ethtypes.Transac
 // WaitMined waits for tx to be mined on the blockchain
 // It returns tx receipt when the tx has been mined and enough block confirmations have passed
 func WaitMinedWithTxHash(ctx context.Context, ec *ethclient.Client,
-	txHash string, blockDelay uint64) (*ethtypes.Receipt, error) {
+	txHash string) (*ethtypes.Receipt, error) {
 	// an error possibly returned when a transaction is pending
 	const missingFieldErr = "missing required field 'transactionHash' for Log"
 
@@ -219,6 +231,10 @@ func WaitMinedWithTxHash(ctx context.Context, ec *ethclient.Client,
 	txHashBytes := common.HexToHash(txHash)
 	fmt.Printf("\n")
 	fmt.Printf("Waiting for transaction to be mined.")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 	for {
 		receipt, rerr := ec.TransactionReceipt(ctx, txHashBytes)
 		fmt.Printf(".")
@@ -251,7 +267,7 @@ func WaitMinedWithTxHash(ctx context.Context, ec *ethclient.Client,
 	ddl := big.NewInt(0)
 	latestBlockHeader, err := ec.HeaderByNumber(ctx, nil)
 	if err == nil {
-		ddl.Add(new(big.Int).SetUint64(blockDelay), latestBlockHeader.Number)
+		ddl.Add(new(big.Int).SetUint64(CONFIRMATIONS), latestBlockHeader.Number)
 	}
 	for {
 		latestBlockHeader, err := ec.HeaderByNumber(ctx, nil)
